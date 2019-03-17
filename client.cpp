@@ -44,6 +44,9 @@ void send_recv()
     zmq_msg_close(&request);
 
     printf("%s",ans);
+    std::cout << std::endl;
+    //printf("\n1\n");
+
 }
 
 void client_off()
@@ -97,6 +100,7 @@ int main(int argc, char *argv[]) {
     printf("Enter client name:\n");
     scanf("%s", message.clientName);
     message.client_proc_id = getpid();
+    std::cout << "client pid = " << message.client_proc_id << std::endl;
     message.action = INIT;
 
     zmq_msg_t clientReq;
@@ -131,16 +135,19 @@ int main(int argc, char *argv[]) {
 
         if (act == 1) {
             message.action = SEND_MESSAGE;
-            printf("Type users name <name name...>:\n");
+            printf("Type users name <name name ...>:\n");
             std::string str;
             getchar();
             std::getline(std::cin, str);
 //            std::cout << str << std::endl;
             std::istringstream iss(str);
+            int count = 0;
             for(std::string s; iss >> s; ) {
-                message.namesOfClients.push_back(s);
+                strcpy(message.names[count].Client, s.c_str());
+                ++count;
             }
 
+            message.sizeOfNames = count;
             printf("Type message:\n");
             std::getline(std::cin, str);
 //            std::cout << str << std::endl;

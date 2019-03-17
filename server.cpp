@@ -78,13 +78,18 @@ int main(int argc, char *argv[]) {
             int ctmp;
             in_history >> ctmp;
 
+
             if (ctmp == END) {
                 break;
             }
 
+            char c;
+            in_history.get(c);
 
-            std::string  mes;
+
+            std::string mes;
             std::getline(in_history, mes);
+
 
             history.push_back(mes);
 
@@ -138,6 +143,7 @@ int main(int argc, char *argv[]) {
     for (;;) {
         zmq_msg_init(&request);
         zmq_msg_recv(&request, responder, 0);
+        message = (Message *) zmq_msg_data(&request);
         printf("Recieved message from %s action: %d \n", message->clientName, message->action);
         ans[0] = '\0';
         std::string clientName(message->clientName);
@@ -154,6 +160,7 @@ int main(int argc, char *argv[]) {
                 //std::vector<std::pair<std::vector<std::string>, std::string> > debtors; // users, message
                 for (auto &j : i.first) {
                     if (clientName == j) {
+
 
                         strcat(ans, i.second.c_str());
                         strcat(ans, "\n");
@@ -196,16 +203,21 @@ int main(int argc, char *argv[]) {
 
             std::vector<std::string> users;
             bool clientExist;
-            for (auto &client : message->namesOfClients) { // проход по получателям
+            for (int j = 0; j < message->sizeOfNames; ++j) {
+                std::string client(message->names[j].Client);
+                //message->names[i]; // проход по получателям
                 clientExist = false;
                 for (auto &i : tree) { // проход по пользователям
                     if (i.first == client) { // нашли пользователя
                         clientExist = true;
 
                         if (i.second == 0) {//он оффлайн
+//                            std::cout << "offline " ;
+//                            std::cout << i.first << " " << i.second << std::endl;
                             users.push_back(i.first);
                         } else if (i.second != message->client_proc_id) {
-
+//                            std::cout << "online " ;
+//                            std::cout << i.first << " " << i.second << std::endl;
                             kill(i.second, SIGUSR1);
                         }
                     }
@@ -215,8 +227,9 @@ int main(int argc, char *argv[]) {
                     strcat(ans, client.c_str());
                     strcat(ans, " isn't exists\n");
                 }
-            }
 
+                strcat(ans, "OK\n");
+            }
 
             if (!users.empty()) {
                 std::string _message(ans_publ);
@@ -231,6 +244,7 @@ int main(int argc, char *argv[]) {
 
                 strcat(ans, i.c_str());
                 strcat(ans, "\n");
+                std::cout << i << std::endl;
 
             }
 
